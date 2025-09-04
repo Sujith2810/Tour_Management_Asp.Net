@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace Tour_Management
 {
-    public partial class AdminProfile : System.Web.UI.Page
+    public partial class AdminProfile : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            // Redirect to login if not logged in
+            if (Session["AdminEmail"] == null)
+            {
+                Response.Redirect("AdminLogin2.aspx");
+            }
         }
     }
 }

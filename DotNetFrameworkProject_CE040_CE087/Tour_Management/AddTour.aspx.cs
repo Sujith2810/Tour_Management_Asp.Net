@@ -1,45 +1,77 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
+using System.IO;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace Tour_Management
 {
-    public partial class AddTour : System.Web.UI.Page
+    public partial class AddTour : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
-       
+
         protected void Register_Click(object sender, EventArgs e)
         {
-            SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconnection"].ConnectionString);
-            conn.Open();
-            string insertQuery = "insert into Tour(TOUR_NAME,PLACE,DAYS,PRICE,LOCATIONS,TOUR_INFO,pic) values(@TOUR_NAME,@PLACE,@DAYS,@PRICE,@LOCATIONS,@TOUR_INFO,@pic)";
-            SqlCommand com = new SqlCommand(insertQuery, conn);
-            
-            com.Parameters.AddWithValue("@TOUR_NAME", tour_name.Text);
-            com.Parameters.AddWithValue("@PLACE", place.Text);
-            com.Parameters.AddWithValue("@DAYS", days.Text); 
-            com.Parameters.AddWithValue("@PRICE", price.Text);
-            com.Parameters.AddWithValue("@LOCATIONS", locations.Text);
-            com.Parameters.AddWithValue("@TOUR_INFO", tour_info.Text);
+            // Validate required fields
+            if (string.IsNullOrEmpty(tour_name.Text) || string.IsNullOrEmpty(place.Text) ||
+                string.IsNullOrEmpty(days.Text) || string.IsNullOrEmpty(price.Text))
+            {
+                lblMessage.Text = "Please fill all required fields!";
+                return;
+            }
 
-            FileUpload1.SaveAs(Server.MapPath("~/Tour_pics/") + FileUpload1.FileName);
+            string picFileName = null;
 
-             com.Parameters.AddWithValue("@pic", FileUpload1.FileName);
+            // Handle file upload
+            if (FileUpload1.HasFile)
+            {
+                string folderPath = Server.MapPath("~/Tour_pics/");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath); // create folder if not exist
+                }
 
+                picFileName = Path.GetFileName(FileUpload1.FileName);
+                FileUpload1.SaveAs(Path.Combine(folderPath, picFileName));
+            }
 
-            com.ExecuteNonQuery();
-            Response.Write("ADD  Successful");
-            //Response.Redirect("a.aspx");
-            //Server.Transfer("a.aspx");
-            conn.Close();
+            // Insert into database
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconnection"].ConnectionString))
+            {
+                conn.Open();
+                string insertQuery = @"INSERT INTO Tour 
+                    (TOUR_NAME, PLACE, DAYS, PRICE, LOCATIONS, TOUR_INFO, pic)
+                    VALUES
+                    (@TOUR_NAME, @PLACE, @DAYS, @PRICE, @LOCATIONS, @TOUR_INFO, @pic)";
+
+                using (SqlCommand cmd = new SqlCommand(insertQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TOUR_NAME", tour_name.Text);
+                    cmd.Parameters.AddWithValue("@PLACE", place.Text);
+                    cmd.Parameters.AddWithValue("@DAYS", days.Text);
+                    cmd.Parameters.AddWithValue("@PRICE", price.Text);
+                    cmd.Parameters.AddWithValue("@LOCATIONS", locations.Text);
+                    cmd.Parameters.AddWithValue("@TOUR_INFO", tour_info.Text);
+                    cmd.Parameters.AddWithValue("@pic", (object)picFileName ?? DBNull.Value);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            lblMessage.Text = "Tour added successfully!";
+            ClearFields();
+        }
+
+        private void ClearFields()
+        {
+            tour_name.Text = "";
+            place.Text = "";
+            days.Text = "";
+            price.Text = "";
+            locations.Text = "";
+            tour_info.Text = "";
         }
     }
 }
