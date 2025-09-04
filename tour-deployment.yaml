@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tour-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tour-management
+  template:
+    metadata:
+      labels:
+        app: tour-management
+    spec:
+      nodeSelector:
+        kubernetes.io/os: windows
+      containers:
+      - name: tour-management
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/tour-management-app:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_SERVER
+          value: "<RDS_ENDPOINT>"
+        - name: DB_NAME
+          value: "TourDB"
+        - name: DB_USER
+          value: "<DB_USERNAME>"
+        - name: DB_PASSWORD
+          value: "<DB_PASSWORD>"
+        volumeMounts:
+        - name: tour-pics
+          mountPath: C:/inetpub/wwwroot/Tour_pics
+      volumes:
+      - name: tour-pics
+        hostPath:
+          path: C:/Tour_pics
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tour-management-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: tour-management
