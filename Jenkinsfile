@@ -4,9 +4,8 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "010426082127"
         AWS_REGION = "us-east-1"
-        ECR_REPO = "010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project"
-        KUBE_CONFIG = "/home/ubuntu/.kube/config" // path to kubeconfig on Jenkins server
-        DOCKERFILE_PATH = "Tour_Management/Dockerfile"
+        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/dotnet-project"
+        KUBE_CONFIG = "/home/ubuntu/.kube/config"  // Adjust if kubeconfig is elsewhere
     }
 
     stages {
@@ -18,8 +17,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Use the correct Dockerfile path and root as context
-                sh "docker build -t dotnet-project -f ${DOCKERFILE_PATH} ."
+                // Build using Dockerfile in project root
+                sh "docker build -t dotnet-project ."
             }
         }
 
@@ -38,18 +37,18 @@ pipeline {
 
         stage('Deploy to EKS') {
             steps {
-                // Apply your Kubernetes deployment manifest
-                sh "kubectl --kubeconfig=${KUBE_CONFIG} apply -f Tour_Management/k8s/tour-deployment.yaml"
+                // Deploy using your YAML file at project root
+                sh "kubectl --kubeconfig=${KUBE_CONFIG} apply -f tour-deployment.yaml"
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo '✅ Deployment successful!'
         }
         failure {
-            echo 'Deployment failed!'
+            echo '❌ Deployment failed!'
         }
     }
 }
