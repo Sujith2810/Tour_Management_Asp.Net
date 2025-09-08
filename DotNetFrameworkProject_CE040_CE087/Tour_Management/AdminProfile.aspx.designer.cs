@@ -8,7 +8,6 @@ namespace Tour_Management
 {
     public partial class AdminProfile
     {
-        protected global::System.Web.UI.HtmlControls.HtmlForm form1;
         protected global::System.Web.UI.WebControls.LinkButton lnkLogout;
         protected global::System.Web.UI.WebControls.GridView GridViewBookings;
         protected global::System.Web.UI.WebControls.SqlDataSource SqlDataSourceBookings;
