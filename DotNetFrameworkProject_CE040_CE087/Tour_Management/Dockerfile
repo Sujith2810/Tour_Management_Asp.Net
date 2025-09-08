@@ -1,21 +1,21 @@
-# Use the official .NET 6 ASP.NET runtime image (Linux)
+# Base runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-# Use the SDK image to build/publish the app
+# SDK image for build
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
-# Copy project files
-COPY ["Tour_Management.csproj", "./"]
-# Restore dependencies
-RUN dotnet restore "./Tour_Management.csproj"
+# Copy csproj and restore
+COPY ./Tour_Management/Tour_Management.csproj ./
+RUN dotnet restore
 
-# Copy the rest of the source code
-COPY . .
-# Build and publish the app
-RUN dotnet publish "Tour_Management.csproj" -c Release -o /app/publish
+# Copy the rest of the code
+COPY ./Tour_Management/. ./
+
+# Build and publish
+RUN dotnet publish -c Release -o /app/publish
 
 # Copy published files to runtime image
 FROM base AS final
