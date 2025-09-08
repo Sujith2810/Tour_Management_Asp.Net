@@ -2,9 +2,11 @@ pipeline {
     agent any
 
     environment {
-        ECR_REPO = "<AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/tour-management-app"
+        AWS_ACCOUNT_ID = "010426082127"
         AWS_REGION = "us-east-1"
-        KUBE_CONFIG = "C:/Users/jenkins/.kube/config" // path to kubeconfig on Jenkins server
+        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/tour-management-app"
+        KUBE_CONFIG = "/home/ubuntu/.kube/config" // Adjust if your kubeconfig is elsewhere
+        DOCKERFILE_PATH = "Tour_Management/Dockerfile"
     }
 
     stages {
@@ -16,26 +18,26 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t tour-management-app .'
+                sh "docker build -t tour-management-app -f ${DOCKERFILE_PATH} ."
             }
         }
 
         stage('Login to ECR') {
             steps {
-                bat "aws ecr get-login-password --region %AWS_REGION% | docker login --username AWS --password-stdin %ECR_REPO%"
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
             }
         }
 
         stage('Push to ECR') {
             steps {
-                bat "docker tag tour-management-app:latest %ECR_REPO%:latest"
-                bat "docker push %ECR_REPO%:latest"
+                sh "docker tag tour-management-app:latest ${ECR_REPO}:latest"
+                sh "docker push ${ECR_REPO}:latest"
             }
         }
 
         stage('Deploy to EKS') {
             steps {
-                bat "kubectl --kubeconfig=%KUBE_CONFIG% apply -f tour-deployment.yaml"
+                sh "kubectl --kubeconfig=${KUBE_CONFIG} apply -f k8s/"
             }
         }
     }
