@@ -1,7 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tour-management-app
+  name: tour-management-deployment
+  labels:
+    app: tour-management
 spec:
   replicas: 1
   selector:
@@ -13,19 +15,23 @@ spec:
         app: tour-management
     spec:
       containers:
-      - name: tour-management
-        image: 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest
-        ports:
-        - containerPort: 80
+        - name: tour-management-container
+          image: 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: tour-management-service
 spec:
+  type: LoadBalancer
   selector:
     app: tour-management
-  type: LoadBalancer
   ports:
     - protocol: TCP
       port: 80
