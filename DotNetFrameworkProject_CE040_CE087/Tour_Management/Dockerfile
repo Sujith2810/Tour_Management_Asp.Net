@@ -1,22 +1,11 @@
-# Use official .NET SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+# Use Microsoft ASP.NET runtime image
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
 
-# Copy project files
-COPY *.csproj .
-RUN dotnet restore
+# Set working directory
+WORKDIR /inetpub/wwwroot
 
-# Copy everything else and build
+# Copy all project files
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
 
-# Use runtime image for smaller final image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /app
-COPY --from=build /app/publish .
-
-# Expose port 80
+# Expose port
 EXPOSE 80
-
-# Start the app
-ENTRYPOINT ["dotnet", "Tour_Management.dll"]
