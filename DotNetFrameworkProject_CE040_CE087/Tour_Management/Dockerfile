@@ -1,11 +1,22 @@
-# Use Windows Server Core with IIS
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
+# Use official .NET SDK image to build the app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-# Set working directory
-WORKDIR /inetpub/wwwroot
+# Copy project files
+COPY *.csproj .
+RUN dotnet restore
 
-# Copy project to container
+# Copy everything else and build
 COPY . .
+RUN dotnet publish -c Release -o /app/publish
 
-# Expose IIS port
+# Use runtime image for smaller final image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+
+# Expose port 80
 EXPOSE 80
+
+# Start the app
+ENTRYPOINT ["dotnet", "Tour_Management.dll"]
