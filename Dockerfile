@@ -1,17 +1,23 @@
-# Build Stage
+# Use the official .NET SDK image for building
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
 WORKDIR /src
 
-# Copy csproj and restore dependencies
-COPY Tour_Management.csproj ./
-RUN dotnet restore Tour_Management.csproj
+# Copy the project file and restore dependencies
+COPY DotNetFrameworkProject_CE040_CE087/Tour_Management/Tour_Management.csproj ./Tour_Management/
+RUN dotnet restore ./Tour_Management/Tour_Management.csproj
 
-# Copy everything else and build
-COPY . .
-RUN dotnet publish Tour_Management.csproj -c Release -o /app/publish
+# Copy the rest of the source code
+COPY DotNetFrameworkProject_CE040_CE087/Tour_Management ./Tour_Management
 
-# Runtime Stage
+WORKDIR /src/Tour_Management
+
+# Build and publish the project
+RUN dotnet publish -c Release -o /app/publish
+
+# Use the official .NET runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
+EXPOSE 80
 ENTRYPOINT ["dotnet", "Tour_Management.dll"]
