@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tour-management-app
-  labels:
-    app: tour-management
 spec:
   replicas: 2
   selector:
@@ -16,34 +14,18 @@ spec:
     spec:
       containers:
       - name: tour-management
-        image: <your-ecr-repo-uri>:latest  # Replace with your ECR image URI
+        image: <account-id>.dkr.ecr.<region>.amazonaws.com/tour-management-app:latest
         ports:
         - containerPort: 80
-        env:
-        - name: ASPNETCORE_ENVIRONMENT
-          value: "Production"
-        - name: CONNECTION_STRING
-          valueFrom:
-            secretKeyRef:
-              name: tourdb-secret
-              key: connectionString
-        resources:
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: tour-management-service
 spec:
-  type: LoadBalancer
   selector:
     app: tour-management
+  type: LoadBalancer
   ports:
     - protocol: TCP
       port: 80
