@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: tour-management-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tour-management
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: tour-management
-        image: <account-id>.dkr.ecr.<region>.amazonaws.com/tour-management-app:latest
+        image: 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest
         ports:
         - containerPort: 80
 ---
