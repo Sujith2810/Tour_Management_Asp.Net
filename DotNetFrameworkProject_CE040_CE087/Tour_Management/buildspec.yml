@@ -1,0 +1,27 @@
+version: 0.2
+
+env:
+  variables:
+    REPOSITORY_URI: "<your-ecr-repo-uri>"  # e.g., 123456789012.dkr.ecr.us-east-1.amazonaws.com/tour-management-app
+    IMAGE_TAG: "latest"
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI)
+
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -f DotNetFrameworkProject_CE040_CE087/Tour_Management/Dockerfile -t $REPOSITORY_URI:$IMAGE_TAG .
+
+  post_build:
+    commands:
+      - echo Pushing the Docker image to ECR...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Build and push completed successfully.
+
+artifacts:
+  files: []
