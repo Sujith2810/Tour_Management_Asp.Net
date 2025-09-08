@@ -37,7 +37,7 @@ pipeline {
 
         stage('Deploy to EKS') {
             steps {
-                sh "kubectl --kubeconfig=${KUBE_CONFIG} apply -f k8s/"
+                sh "kubectl --kubeconfig=${KUBE_CONFIG} apply -f DotNetFrameworkProject_CE040_CE087/Tour_Management/k8s/tour-deployment.yaml"
             }
         }
     }
