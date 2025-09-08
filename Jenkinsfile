@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "010426082127"
         AWS_REGION = "us-east-1"
-        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/tour-management-app"
+        ECR_REPO = "010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project"
         KUBE_CONFIG = "/home/ubuntu/.kube/config" // Adjust if your kubeconfig is elsewhere
         DOCKERFILE_PATH = "Tour_Management/Dockerfile"
     }
@@ -12,26 +12,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourusername/yourrepo.git'
+                git branch: 'main', url: 'https://github.com/Sujith2810/Tour_Management_Asp.Net.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t tour-management-app -f ${DOCKERFILE_PATH} ."
+                sh "docker build -t dotnet-project ."
             }
         }
 
         stage('Login to ECR') {
             steps {
-                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
+                sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 010426082127.dkr.ecr.us-east-1.amazonaws.com"
             }
         }
 
         stage('Push to ECR') {
             steps {
-                sh "docker tag tour-management-app:latest ${ECR_REPO}:latest"
-                sh "docker push ${ECR_REPO}:latest"
+                sh "docker tag dotnet-project:latest 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest"
+                sh "docker push 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest"
             }
         }
 
