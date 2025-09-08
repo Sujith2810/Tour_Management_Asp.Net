@@ -1,9 +1,13 @@
+#Deployment
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tour-management-deployment
+  name: tour-management-app
+  labels:
+    app: tour-management
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: tour-management
@@ -12,39 +16,30 @@ spec:
       labels:
         app: tour-management
     spec:
-      nodeSelector:
-        kubernetes.io/os: windows
       containers:
       - name: tour-management
-        image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/tour-management-app:latest
+        image: REPLACE_WITH_IMAGE   # CodeBuild will patch this or use kubectl set image
         ports:
         - containerPort: 80
         env:
-        - name: DB_SERVER
-          value: "<RDS_ENDPOINT>"
-        - name: DB_NAME
-          value: "TourDB"
-        - name: DB_USER
-          value: "<DB_USERNAME>"
-        - name: DB_PASSWORD
-          value: "<DB_PASSWORD>"
-        volumeMounts:
-        - name: tour-pics
-          mountPath: C:/inetpub/wwwroot/Tour_pics
-      volumes:
-      - name: tour-pics
-        hostPath:
-          path: C:/Tour_pics
-          type: DirectoryOrCreate
----
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: CONNECTION_STRING   # optionally read from Kubernetes Secret
+          valueFrom:
+            secretKeyRef:
+              name: tourdb-secret
+              key: connectionString
+
+#Service
+
 apiVersion: v1
 kind: Service
 metadata:
   name: tour-management-service
 spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 80
   selector:
     app: tour-management
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
