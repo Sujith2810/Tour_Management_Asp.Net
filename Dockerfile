@@ -6,6 +6,8 @@ WORKDIR /src
 # Copy the project file and restore dependencies
 COPY DotNetFrameworkProject_CE040_CE087/Tour_Management/Tour_Management.csproj ./Tour_Management/
 RUN dotnet restore ./Tour_Management/Tour_Management.csproj
+COPY DotNetFrameworkProject_CE040_CE087/Tour_Management ./Tour_Management
+
 
 # Copy the rest of the source code
 COPY DotNetFrameworkProject_CE040_CE087/Tour_Management ./Tour_Management
