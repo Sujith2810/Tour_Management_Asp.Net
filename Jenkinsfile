@@ -4,8 +4,8 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "010426082127"
         AWS_REGION = "us-east-1"
-        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/dotnet-project"
-        KUBE_CONFIG = "/home/ubuntu/.kube/config"  // Adjust if kubeconfig is elsewhere
+        ECR_REPO = "010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project"
+        KUBE_CONFIG = "/home/ubuntu/.kube/config"
     }
 
     stages {
@@ -17,27 +17,25 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Build using Dockerfile in project root
                 sh "docker build -t dotnet-project ."
             }
         }
 
         stage('Login to ECR') {
             steps {
-                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
+                sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 010426082127.dkr.ecr.us-east-1.amazonaws.com"
             }
         }
 
         stage('Push to ECR') {
             steps {
-                sh "docker tag dotnet-project:latest ${ECR_REPO}:latest"
-                sh "docker push ${ECR_REPO}:latest"
+                sh "docker tag dotnet-project:latest 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest"
+                sh "docker push 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest"
             }
         }
 
         stage('Deploy to EKS') {
             steps {
-                // Deploy using your YAML file at project root
                 sh "kubectl --kubeconfig=${KUBE_CONFIG} apply -f tour-deployment.yaml"
             }
         }
