@@ -1,31 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tour-app
+  name: tour-management-deployment
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: tour-app
+      app: tour-management
   template:
     metadata:
       labels:
-        app: tour-app
+        app: tour-management
     spec:
       containers:
-      - name: tour-app
+      - name: tour-management
         image: 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:latest
         ports:
         - containerPort: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: tour-app-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: tour-app
-  ports:
-  - port: 80
-    targetPort: 80

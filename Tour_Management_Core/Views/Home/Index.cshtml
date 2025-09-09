@@ -1,0 +1,26 @@
+@model IEnumerable<Tour_Management_Core.Models.Tour>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tour Management</title>
+</head>
+<body>
+    <h1>Available Tours</h1>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Price</th>
+        </tr>
+        @foreach(var tour in Model)
+        {
+            <tr>
+                <td>@tour.Name</td>
+                <td>@tour.Location</td>
+                <td>@tour.Price</td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
