@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCOUNT_ID = "010426082127"
+        AWS_REGION = "us-east-1"
+        ECR_REPO = "010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project"
+        IMAGE_TAG = "latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Sujith2810/Tour_Management_Asp.Net.git'
+            }
+        }
+
+        stage('Login to AWS ECR') {
+            steps {
+                script {
+                    sh """
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 010426082127.dkr.ecr.us-east-1.amazonaws.com
+                    """
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh """
+                        docker build -t dotnet-project .:${IMAGE_TAG} \
+                        -f DotNetFrameworkProject_CE040_CE087/Tour_Management/Dockerfile .
+                    """
+                }
+            }
+        }
+
+        stage('Tag & Push to ECR') {
+            steps {
+                script {
+                    sh """
+                        docker tag dotnet-project:latest 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:${IMAGE_TAG}
+                        docker push 010426082127.dkr.ecr.us-east-1.amazonaws.com/dotnet-project:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh """
+                        kubectl set image deployment/tour-management-deployment \
+                        tour-management-container=${ECR_REPO}:${IMAGE_TAG} \
+                        --namespace default
+                    """
+                }
+            }
+        }
+    }
+}
